@@ -11,6 +11,7 @@ use va_list::VaList;
 /// 4. Latches.
 /// 5. Log.
 /// 6. Box - errors, sessions, sequences, transactions, indexes, spaces, tuples.
+/// 7. XTM.
 
 // Clock.
 extern "C" {
@@ -328,5 +329,33 @@ extern "C" {
         ctx: *mut BoxFunctionCtx,
         mp: *const c_char,
         mp_end: *const c_char,
+    ) -> c_int;
+}
+
+#[repr(C)]
+pub struct XTMQueue {
+    _unused: [u8; 0],
+}
+
+extern "C" {
+    pub fn xtm_create(size: u32) -> *mut XTMQueue;
+    pub fn xtm_delete(queue: *mut XTMQueue) -> c_int;
+    pub fn xtm_msg_notify(queue: *mut XTMQueue) -> c_int;
+    pub fn xtm_msg_probe(queue: *mut XTMQueue) -> c_int;
+    pub fn xtm_msg_count(queue: *mut XTMQueue) -> u32;
+    pub fn xtm_fun_dispatch(
+        queue: *mut XTMQueue,
+        func: FiberFunc,
+        fun_arg: *mut c_void,
+        delayed: c_int,
+    ) -> c_int;
+    pub fn xtm_fd(queue: *mut XTMQueue) -> c_int;
+    pub fn xtm_fun_invoke(queue: *mut XTMQueue, flushed: c_int) -> c_int;
+    pub fn xtm_msg_send(queue: *mut XTMQueue, msg: *mut c_void, delayed: c_int) -> c_int;
+    pub fn xtm_msg_recv(
+        queue: *mut XTMQueue,
+        msg: *mut *mut c_void,
+        count: u32,
+        flushed: c_int,
     ) -> c_int;
 }
